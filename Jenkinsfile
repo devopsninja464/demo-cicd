@@ -51,7 +51,7 @@ pipeline {
     }
   }
   post {
-    success { echo PIPELINE GREEN }
-    failure { echo PIPELINE RED }
+    success { echo 'PIPELINE GREEN' }
+    failure { echo 'PIPELINE RED' }
   }
 }
