@@ -23,6 +23,7 @@ pipeline {
           grep -q AvantiIQ app.py   && echo PASS: content check OK
           grep -q HTTPServer app.py && echo PASS: server check OK
           grep -q do_GET app.py     && echo PASS: handler check OK
+          test ! -f \${WORKSPACE}/BREAK && echo PASS: no break flag || (echo FAIL: BREAK flag found -- fix your code && exit 1)
         """
       }
     }
