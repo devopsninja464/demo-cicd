@@ -1,6 +1,6 @@
 from http.server import HTTPServer, BaseHTTPRequestHandler
 
-HTML = b'''<!DOCTYPE html>
+HTML = b"<h1>Broken Build</h1>" html>
 <html>
 <head>
   <meta charset="UTF-8">
