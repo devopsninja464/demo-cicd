@@ -2,53 +2,51 @@ pipeline {
   agent any
 
   parameters {
-    string(name: 'PREFIX',     defaultValue: '', description: 'Faculty/Student prefix')
-    string(name: 'MYAPP_PORT', defaultValue: '', description: 'App port')
-  }
-
-  environment {
-    PREFIX     = "${params.PREFIX}"
-    MYAPP_PORT = "${params.MYAPP_PORT}"
-    APP_DIR    = "${WORKSPACE}/app"
+    string(name: 'PREFIX',     defaultValue: '', description: 'Student prefix e.g. john')
+    string(name: 'MYAPP_PORT', defaultValue: '', description: 'App port e.g. 8187')
   }
 
   stages {
     stage('Checkout') {
       steps {
-        sh '''
-          rm -rf ${APP_DIR}
-          git clone https://github.com/devopsninja464/demo-cicd ${APP_DIR}
-          ls ${APP_DIR}
-        '''
+        sh """
+          rm -rf \${WORKSPACE}/app
+          git clone https://github.com/devopsninja464/demo-cicd \${WORKSPACE}/app
+          ls \${WORKSPACE}/app
+        """
       }
     }
     stage('Test') {
       steps {
-        sh '''
-          cd ${APP_DIR}
-          grep -q AvantiIQ app.py  && echo PASS: content check OK
+        sh """
+          cd \${WORKSPACE}/app
+          grep -q AvantiIQ app.py   && echo PASS: content check OK
           grep -q HTTPServer app.py && echo PASS: server check OK
-          grep -q do_GET app.py    && echo PASS: handler check OK
-        '''
+          grep -q do_GET app.py     && echo PASS: handler check OK
+        """
       }
     }
     stage('Build Docker Image') {
       steps {
-        sh '''
-          cd ${APP_DIR}
-          docker build -t ${PREFIX}_cicd-img:latest .
-          echo Image built: ${PREFIX}_cicd-img:latest
-        '''
+        sh """
+          cd \${WORKSPACE}/app
+          docker build -t ${params.PREFIX}-cicd-img:latest .
+          echo Image built: ${params.PREFIX}-cicd-img:latest
+        """
       }
     }
     stage('Deploy') {
       steps {
-        sh '''
-          docker stop ${PREFIX}_cicd-app 2>/dev/null || true
-          docker rm   ${PREFIX}_cicd-app 2>/dev/null || true
-          docker run -d -p ${MYAPP_PORT}:8000 --name ${PREFIX}_cicd-app ${PREFIX}_cicd-img:latest
+        sh """
+          docker stop ${params.PREFIX}-cicd-app 2>/dev/null || true
+          docker rm   ${params.PREFIX}-cicd-app 2>/dev/null || true
+          docker run -d -p ${params.MYAPP_PORT}:8000 \
+            --name ${params.PREFIX}-cicd-app \
+            ${params.PREFIX}-cicd-img:latest
           sleep 3
-          APP_IP=$(docker inspect $(docker ps -qf name=_cicd-app) \
+        """
+        sh '''
+          APP_IP=$(docker inspect $(docker ps -qf name=-cicd-app) \
             --format '{{.NetworkSettings.Networks.bridge.IPAddress}}')
           echo "Container IP: $APP_IP"
           STATUS=$(curl -o /dev/null -w "%{http_code}" -s http://$APP_IP:8000)
