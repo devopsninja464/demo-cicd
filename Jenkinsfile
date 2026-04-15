@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   parameters {
-    string(name: 'PREFIX',     defaultValue: '', description: 'Student prefix')
+    string(name: 'PREFIX',     defaultValue: '', description: 'Faculty/Student prefix')
     string(name: 'MYAPP_PORT', defaultValue: '', description: 'App port')
   }
 
